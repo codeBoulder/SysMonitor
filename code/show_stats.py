@@ -4,11 +4,11 @@ import ctypes
 from GUI import stats_type, colors
 
 # Завантаження бібліотеки
-get_stats = ctypes.CDLL(r"C:\Users\Admin\Documents\GitHub\SysMonitor\system_stats.dll")
+get_stats = ctypes.CDLL("code/system_stats.dll")
 
 # Вказуємо типи повернення
 get_stats.get_cpu_usage.restype = ctypes.c_double
-get_stats.get_memory_stats.restype = ctypes.c_double
+get_stats.get_memory_usage.restype = ctypes.c_double
 get_stats.get_disk_usage.restype = ctypes.c_double
 
 # === Буфери для даних ===
@@ -41,8 +41,8 @@ def update(frame):
     global cpu_data, ram_data, disk_data
 
     # Отримуємо свіжі дані
-    cpu_usage = get_stats.get_cpu_usage() / 100000000
-    ram_usage = get_stats.get_memory_stats()
+    cpu_usage = get_stats.get_cpu_usage()
+    ram_usage = get_stats.get_memory_usage()
     disk_usage = get_stats.get_disk_usage()
 
     # Додаємо дані в буфери

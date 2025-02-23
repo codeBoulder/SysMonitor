@@ -34,7 +34,7 @@ def start_button_def():
         colors.append("blue")
     
     if stats_type:  # Якщо список не порожній
-        os.startfile("show_stats.py")
+        os.startfile("code\show_stats.py")
         root.after(2000, root.destroy)
 
 tk.Button(root, text='Start', command=start_button_def, width=10).pack()
