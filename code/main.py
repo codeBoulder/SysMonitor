@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import ctypes
+import time
 from GUI import stats_type, colors
 
-# Завантаження бібліотеки
+# Library download
 get_stats = ctypes.CDLL("code/system_stats.dll")
 
-# Вказуємо типи повернення
+# Specifying the result type
 get_stats.get_cpu_usage.restype = ctypes.c_double
 get_stats.get_memory_usage.restype = ctypes.c_double
 get_stats.get_disk_usage.restype = ctypes.c_double
@@ -25,7 +26,7 @@ fig, axes = plt.subplots(len(stats_type), 1, figsize=(10, 8), sharex=True)
 for ax, title, color in zip(axes, stats_type, colors):
     ax.set_xlim(-time_window, 0)  # Часова шкала
     ax.set_ylim(0, 100)  # Відсоткове використання
-    ax.set_ylabel("Використання (%)")
+    ax.set_ylabel("Usage (%)")
     ax.set_title(title)
     ax.grid(True)
 
@@ -62,7 +63,7 @@ def update(frame):
     return lines
 
 # === Запуск анімації ===
-ani = animation.FuncAnimation(fig, update, interval=1000, blit=False)
+ani = animation.FuncAnimation(fig, update, interval=1000, blit=False, cache_frame_data=False)
 
 plt.tight_layout()
 plt.show()

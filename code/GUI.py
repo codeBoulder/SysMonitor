@@ -23,6 +23,9 @@ tk.Checkbutton(stats_frame, text="Disk", variable=checked_disk).pack(side=tk.LEF
 
 def start_button_def():
     global stats_type, colors
+    stats_type = []
+    colors = []
+
     if checked_cpu.get():
         stats_type.append("CPU")
         colors.append("red")
@@ -33,10 +36,19 @@ def start_button_def():
         stats_type.append("DISK")
         colors.append("blue")
     
-    if stats_type:  # Якщо список не порожній
-        os.startfile("code\show_stats.py")
+    if len(stats_type) >= 2:  # Якщо список не порожній
+        entry.delete(0, tk.END)
+        entry.insert(tk.END, f"Starting...")
+        os.startfile("code\\main.py")
         root.after(2000, root.destroy)
+    
+    elif len(stats_type) < 2:
+        entry.delete(0, tk.END)
+        entry.insert(tk.END, f"You must pick at least 2 elements.")
 
-tk.Button(root, text='Start', command=start_button_def, width=10).pack()
+tk.Button(root, text='Start', command=start_button_def, width=20).pack()
+
+entry = tk.Entry(root, width=30, font=("Arial", 10))
+entry.pack(padx=20, pady=20)
 
 root.mainloop()

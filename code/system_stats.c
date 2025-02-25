@@ -4,22 +4,43 @@
 
 __declspec(dllexport) double get_cpu_usage()
 {
+    static FILETIME preIdleTime = {0}, preKernelTime = {0}, preUserTime = {0};
     FILETIME idleTime, kernelTime, userTime;
-    static FILETIME preIdleTime, preKernelTime, preUserTime;
 
+    // Отримуємо поточний стан CPU
     if (!GetSystemTimes(&idleTime, &kernelTime, &userTime))
         return -1.0;
 
-    ULONGLONG idle = (*(ULONGLONG*)&idleTime) - (*(ULONGLONG*)&preIdleTime);
-    ULONGLONG kernel = (*(ULONGLONG*)&kernelTime) - (*(ULONGLONG*)&preKernelTime);
-    ULONGLONG user = (*(ULONGLONG*)&userTime) - (*(ULONGLONG*)&preUserTime);
+    // Якщо це перший виклик, просто зберігаємо значення і чекаємо наступного разу
+    if (preIdleTime.dwLowDateTime == 0 && preIdleTime.dwHighDateTime == 0) {
+        preIdleTime = idleTime;
+        preKernelTime = kernelTime;
+        preUserTime = userTime;
+        return 0.0; // Повертаємо 0, бо ще нема достатніх даних
+    }
 
+    // Конвертація FILETIME у 64-бітний ULONGLONG
+    ULONGLONG idleDiff = ((ULONGLONG)idleTime.dwHighDateTime << 32 | idleTime.dwLowDateTime) -
+                         ((ULONGLONG)preIdleTime.dwHighDateTime << 32 | preIdleTime.dwLowDateTime);
+
+    ULONGLONG kernelDiff = ((ULONGLONG)kernelTime.dwHighDateTime << 32 | kernelTime.dwLowDateTime) -
+                           ((ULONGLONG)preKernelTime.dwHighDateTime << 32 | preKernelTime.dwLowDateTime);
+
+    ULONGLONG userDiff = ((ULONGLONG)userTime.dwHighDateTime << 32 | userTime.dwLowDateTime) -
+                         ((ULONGLONG)preUserTime.dwHighDateTime << 32 | preUserTime.dwLowDateTime);
+
+    ULONGLONG totalDiff = kernelDiff + userDiff;
+
+    if (totalDiff == 0) return 0.0;
+
+    // Оновлюємо попередні значення для наступного виклику
     preIdleTime = idleTime;
     preKernelTime = kernelTime;
     preUserTime = userTime;
 
-    return (double)(kernel + user - idle) * 100.0 / (kernel + user);
+    return (double)(totalDiff - idleDiff) * 100.0 / totalDiff;
 }
+
 
 __declspec(dllexport) int get_memory_usage()
 {
