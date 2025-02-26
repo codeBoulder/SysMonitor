@@ -2,24 +2,24 @@
 #include <windows.h>
 #include <stdio.h>
 
-__declspec(dllexport) double get_cpu_usage()
+__declspec(dllexport)     double get_cpu_usage()
 {
     static FILETIME preIdleTime = {0}, preKernelTime = {0}, preUserTime = {0};
     FILETIME idleTime, kernelTime, userTime;
 
-    // Отримуємо поточний стан CPU
+    // Get curent CPU stats
     if (!GetSystemTimes(&idleTime, &kernelTime, &userTime))
         return -1.0;
 
-    // Якщо це перший виклик, просто зберігаємо значення і чекаємо наступного разу
+
     if (preIdleTime.dwLowDateTime == 0 && preIdleTime.dwHighDateTime == 0) {
         preIdleTime = idleTime;
         preKernelTime = kernelTime;
         preUserTime = userTime;
-        return 0.0; // Повертаємо 0, бо ще нема достатніх даних
+        return 0.0;
     }
 
-    // Конвертація FILETIME у 64-бітний ULONGLONG
+    // Convert FILETIME into 64-bit ULONGLONG
     ULONGLONG idleDiff = ((ULONGLONG)idleTime.dwHighDateTime << 32 | idleTime.dwLowDateTime) -
                          ((ULONGLONG)preIdleTime.dwHighDateTime << 32 | preIdleTime.dwLowDateTime);
 
@@ -31,9 +31,9 @@ __declspec(dllexport) double get_cpu_usage()
 
     ULONGLONG totalDiff = kernelDiff + userDiff;
 
-    if (totalDiff == 0) return 0.0;
+    if (totalDiff == 0) return 0.0;    
 
-    // Оновлюємо попередні значення для наступного виклику
+    // Update data
     preIdleTime = idleTime;
     preKernelTime = kernelTime;
     preUserTime = userTime;
